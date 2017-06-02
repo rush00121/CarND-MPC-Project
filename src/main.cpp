@@ -129,6 +129,10 @@ int main() {
           Eigen::VectorXd state(6);
           state << 0, 0, 0, v, cte, epsi;
           bool brake = false;
+          /**
+           * Rudimentary condition to check if we are drifting away from the desired trajectory or there is a deviation
+           * in the psi 
+           */
           if(fabs(epsi) > 0.5 || fabs(cte)>1.5){
             brake = true;
           }
