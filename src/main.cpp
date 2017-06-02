@@ -131,7 +131,7 @@ int main() {
           bool brake = false;
           /**
            * Rudimentary condition to check if we are drifting away from the desired trajectory or there is a deviation
-           * in the psi 
+           * in the psi
            */
           if(fabs(epsi) > 0.5 || fabs(cte)>1.5){
             brake = true;
