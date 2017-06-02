@@ -128,10 +128,15 @@ int main() {
           double epsi = -atan(coeffs[1]);
           Eigen::VectorXd state(6);
           state << 0, 0, 0, v, cte, epsi;
-          auto vars = mpc.Solve(state, coeffs);
+          bool brake = false;
+          if(fabs(epsi) > 0.5 || fabs(cte)>1.5){
+            brake = true;
+          }
+          cout<<"PSI="<<psi<<", CTE="<<cte<<", EPSI="<<epsi<<endl;
+          auto vars = mpc.Solve(state, coeffs,brake);
 
-          double steer_value = vars[6];
-          double throttle_value = vars[7];
+          double steer_value = vars[0];
+          double throttle_value = vars[1];
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.

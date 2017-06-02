@@ -25,7 +25,9 @@ const double Lf = 2.67;
 // The reference velocity is set to 40 mph.
 double ref_cte = 0;
 double ref_epsi = 0;
-double ref_v = 70;
+
+double normal_vel = 65 ;
+double curve_vel = 40 ;
 
 // The solver takes all the state variables and actuator
 // variables in a singular vector. Thus, we should to establish
@@ -44,7 +46,8 @@ class FG_eval {
  public:
   // Fitted polynomial coefficients
   Eigen::VectorXd coeffs;
-  FG_eval(Eigen::VectorXd coeffs) { this->coeffs = coeffs; }
+  double speed_limit;
+  FG_eval(Eigen::VectorXd coeffs,double speed_limit) { this->coeffs = coeffs; this->speed_limit = speed_limit;}
 
   typedef CPPAD_TESTVECTOR(AD<double>) ADvector;
   void operator()(ADvector& fg, const ADvector& vars) {
@@ -54,12 +57,11 @@ class FG_eval {
     // the Solver function below.
 
     fg[0] = 0;
-
     // The part of the cost based on the reference state.
     for (int i = 0; i < N; i++) {
-      fg[0] += CppAD::pow(vars[cte_start + i] - ref_cte, 2);
-      fg[0] += CppAD::pow(vars[epsi_start + i] - ref_epsi, 2);
-      fg[0] += CppAD::pow(vars[v_start + i] - ref_v, 2);
+      fg[0] += 2*CppAD::pow(vars[cte_start + i] - ref_cte, 2);
+      fg[0] += 2*CppAD::pow(vars[epsi_start + i] - ref_epsi, 2);
+      fg[0] += CppAD::pow(vars[v_start + i] - speed_limit, 2);
     }
 
     // Minimize the use of actuators.
@@ -70,7 +72,7 @@ class FG_eval {
 
     // Minimize the value gap between sequential actuations.
     for (int i = 0; i < N - 2; i++) {
-      fg[0] += 500* CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
+      fg[0] += 500*CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
       fg[0] += CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
     }
 
@@ -148,7 +150,7 @@ class FG_eval {
 MPC::MPC() {}
 MPC::~MPC() {}
 
-vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
+vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs,bool &brake) {
   bool ok = true;
   size_t i;
   typedef CPPAD_TESTVECTOR(double) Dvector;
@@ -234,8 +236,17 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   constraints_upperbound[cte_start] = cte;
   constraints_upperbound[epsi_start] = epsi;
 
+  double speed_limit;
+
+  if(brake){
+    speed_limit = curve_vel;
+    cout<<"BRAKE"<<endl;
+  }else{
+    speed_limit = normal_vel;
+  }
+
   // object that computes objective and constraints
-  FG_eval fg_eval(coeffs);
+  FG_eval fg_eval(coeffs,speed_limit);
 
   //
   // NOTE: You don't have to worry about these options
@@ -283,8 +294,6 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   //
   // {...} is shorthand for creating a vector, so auto x1 = {1.0,2.0}
   // creates a 2 element double vector.
-  return {solution.x[x_start + 1],   solution.x[y_start + 1],
-          solution.x[psi_start + 1], solution.x[v_start + 1],
-          solution.x[cte_start + 1], solution.x[epsi_start + 1],
-          solution.x[delta_start+1], solution.x[a_start+1]};
+
+  return { solution.x[delta_start+1], solution.x[a_start+1]};
 }

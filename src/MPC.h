@@ -14,7 +14,7 @@ class MPC {
 
   // Solve the model given an initial state and polynomial coefficients.
   // Return the first actuatotions.
-  vector<double> Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs);
+  vector<double> Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs,bool &brake);
 
   //Predicted trajectory coordinates
   vector<double> x_vals;
