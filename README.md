@@ -33,7 +33,7 @@ The equations that govern the state transition for our kinematic model are as fo
 ```
 
 
-###Timestep Length and Elapsed Duration (N & dt)
+### Timestep Length and Elapsed Duration (N & dt)
 
 The system has an inherent delay of 100 ms. Hence it is safe to say that we are sending
 not more than 1 input every 100ms. Hence the time interval between 2 consecutive inputs can be safely assumed to be 100ms. 
@@ -51,14 +51,14 @@ I tried with N = 20, N = 25 but N=10 produced the most stable results.
 I have also limited ipopt to return the result within 0.15 s, hence a lower value of N will ensure that ipopt will complete its computation faster.
 
 
-###Polynomial Fitting and MPC Preprocessing
+### Polynomial Fitting and MPC Preprocessing
 
 I have used a polynomial of order 3 to fit the ptsx and ptsy points to a trajectory. 
 Using the poynomial cooefficient,we can plot a reference trajectory that can be seen in the simulation by
 the yellow line.
 
 
-###Handling Latency
+### Handling Latency
 
 The output actuator signals generated generate N ie 10 actuator inputs for each point on the desired 
 trajectory. Since we have a latency of 100 ms, instead of using the current state actuator, I have 
@@ -73,7 +73,7 @@ If we deviate too much from the reference trajectory, then I change the referenc
 This helps in slowing down the car, as well as accelerating it when the car is on the correct path.
 
 
-###Scope for improvements 
+### Scope for improvements 
 
 1) Latency is not always constant. Hence N and dt should be able to handle this uncertainty
 2) The mechanism for detecting deviation from the reference trajectory can be improved. It can factor in the 
