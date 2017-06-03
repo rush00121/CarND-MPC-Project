@@ -1,5 +1,86 @@
 # CarND-Controls-MPC
+
 Self-Driving Car Engineer Nanodegree Program
+---
+
+### The Model
+   
+We have used a simple kinematic model to represent the vehicle state and its actuators
+
+The model looks like this:
+
+State: [x,y,ψ,v]
+
+Actuators: [δ,a]
+
+where x,y are the vehicle coordinates, the vehicle orientation is ψ and v is the vehicle velocity. 
+
+The vehicle has two actuators, which we'll denote as δ for steering angle and a for acceleration (throttle/brake combined).
+
+The equations that govern the state transition for our kinematic model are as follows : 
+```
+  x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+  
+  y_[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+  
+  psi_[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+  
+  v_[t+1] = v[t] + a[t] * dt
+  
+  cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
+  
+  epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+```
+
+
+###Timestep Length and Elapsed Duration (N & dt)
+
+The system has an inherent delay of 100 ms. Hence it is safe to say that we are sending
+not more than 1 input every 100ms. Hence the time interval between 2 consecutive inputs can be safely assumed to be 100ms. 
+If we take N as 10, then it means we are looking ahead 10 * 100ms = 1 second .
+This is good enough for the simulation since it does not look too far ahead in the future nor too little. 
+Too far is of no use since we need the ipopt the solve the  to produce 
+
+If N = 10, then to match 100ms frequency, dt = 0.1 . 
+
+Higher values of N means we will have more computation required to calculate the 
+desired trajectory using ipopt which is not required. 
+
+I tried with N = 20, N = 25 but N=10 produced the most stable results. 
+
+I have also limited ipopt to return the result within 0.15 s, hence a lower value of N will ensure that ipopt will complete its computation faster.
+
+
+###Polynomial Fitting and MPC Preprocessing
+
+I have used a polynomial of order 3 to fit the ptsx and ptsy points to a trajectory. 
+Using the poynomial cooefficient,we can plot a reference trajectory that can be seen in the simulation by
+the yellow line.
+
+
+###Handling Latency
+
+The output actuator signals generated generate N ie 10 actuator inputs for each point on the desired 
+trajectory. Since we have a latency of 100 ms, instead of using the current state actuator, I have 
+used the next state point actuators. This means that when we send our signal,
+the signal is intended not for the current point, but the point it will be at after 100ms. This is very easy to verify.
+If we send the 0th position input, the car behaves very wobbly that signifies that the signal on which it is 
+acting is the older state. If we send the 2nd position input, the car fails as well. 
+
+I am also using rudimentary mechanisms to detect deviation from the reference trajectory to control speed.
+
+If we deviate too much from the reference trajectory, then I change the reference velocity to a lower value.
+This helps in slowing down the car, as well as accelerating it when the car is on the correct path.
+
+
+###Scope for improvements 
+
+1) Latency is not always constant. Hence N and dt should be able to handle this uncertainty
+2) The mechanism for detecting deviation from the reference trajectory can be improved. It can factor in the 
+   radius of curvature to detect and determine the correct speed. Currently we are using only 2 speed settings.
+   This can be enhanced to determine different speed settings on different trajectory paths.
+3) The current cost functions are manually tuned. It is worth exploring if the cost functions 
+   can be dynamically tuned using twiddle or SGD or some other mechanism.
 
 ---
 
