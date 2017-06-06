@@ -36,7 +36,7 @@ The equations that govern the state transition for our kinematic model are as fo
 ### Timestep Length and Elapsed Duration (N & dt)
 
 The system has an inherent delay of 100 ms. Hence it is safe to say that we are sending
-not more than 1 input every 100ms. Hence the time interval between 2 consecutive inputs can be safely assumed to be 100ms. 
+not more than 1 command every 100ms. Hence the time interval between 2 consecutive inputs can be safely assumed to be 100ms. 
 If we take N as 10, then it means we are looking ahead 10 * 100ms = 1 second .
 This is good enough for the simulation since it does not look too far ahead in the future nor too little. 
 Looking too far ahead can be computationally expensive. 
