@@ -39,7 +39,7 @@ The system has an inherent delay of 100 ms. Hence it is safe to say that we are 
 not more than 1 input every 100ms. Hence the time interval between 2 consecutive inputs can be safely assumed to be 100ms. 
 If we take N as 10, then it means we are looking ahead 10 * 100ms = 1 second .
 This is good enough for the simulation since it does not look too far ahead in the future nor too little. 
-Too far is of no use since we need the ipopt the solve the  to produce 
+Looking too far ahead can be computationally expensive. 
 
 If N = 10, then to match 100ms frequency, dt = 0.1 . 
 
